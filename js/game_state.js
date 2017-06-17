@@ -25,11 +25,26 @@ Minesweeper.GameState = class GameState extends Phaser.State
 
         let t_Size = this.game.Settings.Tiles.Current;
 
-        this.game.world.setBounds(0, 0, 2 * t_Size * this.BrickDimensions.x, 2 * t_Size * this.BrickDimensions.y);
+        let t_ViewBounds = 
+        { 
+            x: 2 * this.game._width, 
+            y: 2 * this.game._height
+        };
 
-        // Center camera
-        this.game.camera.x = t_Size * this.BrickDimensions.x - this.game._width * 0.5;
-        this.game.camera.y = t_Size * this.BrickDimensions.y - this.game._height * 0.5;
+        let t_GameBounds = 
+        { 
+            x: 2 * t_Size * this.BrickDimensions.x, 
+            y: 2 * t_Size * this.BrickDimensions.y
+        };
+
+        let t_Bounds = t_GameBounds;
+        if(t_ViewBounds.x > t_GameBounds.x || t_ViewBounds.y > t_GameBounds.y)
+        {
+            console.log("Using view bounds");
+            t_Bounds = t_ViewBounds;
+        }    
+
+        this.game.world.setBounds(0, 0, t_Bounds.x, t_Bounds.y);
 
         for(let y = 0; y < t_Size; y++)
         {
@@ -38,11 +53,14 @@ Minesweeper.GameState = class GameState extends Phaser.State
             {
                 let t_Element = {};
 
-                t_Element.Sprite = this.game.add.sprite((x + t_Size * 0.5) * this.BrickDimensions.x, (y + t_Size * 0.5) * this.BrickDimensions.y, y == 0 ? "top_brick" : "bottom_brick");
+                t_Element.Sprite = this.game.add.sprite(t_Bounds.x * 0.5 + (x - t_Size * 0.5) * this.BrickDimensions.x, t_Bounds.y * 0.5 + (y - t_Size * 0.5) * this.BrickDimensions.y, y == 0 ? "top_brick" : "bottom_brick");
 
                 this.MineGrid[y][x] = t_Element;
             }
         }
+
+        this.game.camera.x = t_Bounds.x * 0.5 - this.game._width * 0.5;
+        this.game.camera.y = t_Bounds.y * 0.5 - this.game._height * 0.5;
     }
 
     update()
