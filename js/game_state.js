@@ -24,27 +24,33 @@ Minesweeper.GameState = class GameState extends Phaser.State
         this.MineGrid = [];
 
         let t_Size = this.game.Settings.Tiles.Current;
+        let t_ScrollViewSizeMultiplier = 1.2;
 
-        let t_ViewBounds = 
+        // The size of the field in which you can scroll.
+        this.GameBounds = 
         { 
-            x: 2 * this.game._width, 
-            y: 2 * this.game._height
+            x: t_ScrollViewSizeMultiplier * t_Size * this.BrickDimensions.x, 
+            y: t_ScrollViewSizeMultiplier * t_Size * this.BrickDimensions.y
+        };
+        
+        // Screen size, multiplied for correct comparisons to game bounds
+        this.ViewBounds = 
+        { 
+            x: t_ScrollViewSizeMultiplier * this.game._width, 
+            y: t_ScrollViewSizeMultiplier * this.game._height
         };
 
-        let t_GameBounds = 
-        { 
-            x: 2 * t_Size * this.BrickDimensions.x, 
-            y: 2 * t_Size * this.BrickDimensions.y
-        };
-
-        let t_Bounds = t_GameBounds;
-        if(t_ViewBounds.x > t_GameBounds.x || t_ViewBounds.y > t_GameBounds.y)
+        // Determine what bounds we should use for the view.
+        this.Bounds = this.GameBounds;
+        if(this.ViewBounds.x > this.GameBounds.x || this.ViewBounds.y > this.GameBounds.y)
         {
             console.log("Using view bounds");
-            t_Bounds = t_ViewBounds;
+            this.Bounds = this.ViewBounds;
         }    
 
-        this.game.world.setBounds(0, 0, t_Bounds.x, t_Bounds.y);
+        // If the game bounds exceed in any way, make the camera scrollable
+        this.DoesCameraScroll = (this.ViewBounds.x < this.GameBounds.x || this.ViewBounds.y < this.GameBounds.y);
+        this.game.world.setBounds(0, 0, this.Bounds.x, this.Bounds.y);
 
         for(let y = 0; y < t_Size; y++)
         {
@@ -53,19 +59,27 @@ Minesweeper.GameState = class GameState extends Phaser.State
             {
                 let t_Element = {};
 
-                t_Element.Sprite = this.game.add.sprite(t_Bounds.x * 0.5 + (x - t_Size * 0.5) * this.BrickDimensions.x, t_Bounds.y * 0.5 + (y - t_Size * 0.5) * this.BrickDimensions.y, y == 0 ? "top_brick" : "bottom_brick");
+                t_Element.Sprite = this.game.add.sprite(this.Bounds.x * 0.5 + (x - t_Size * 0.5) * this.BrickDimensions.x, this.Bounds.y * 0.5 + (y - t_Size * 0.5) * this.BrickDimensions.y, y == 0 ? "top_brick" : "bottom_brick");
+                t_Element.Sprite.smoothed = false;
 
                 this.MineGrid[y][x] = t_Element;
             }
         }
 
-        this.game.camera.x = t_Bounds.x * 0.5 - this.game._width * 0.5;
-        this.game.camera.y = t_Bounds.y * 0.5 - this.game._height * 0.5;
+        this.game.camera.x = this.Bounds.x * 0.5 - this.game._width * 0.5;
+        this.game.camera.y = this.Bounds.y * 0.5 - this.game._height * 0.5;
+        
+        this.game.input.mouse.mouseWheelCallback = this.UpdateMouseWheel.bind(this);
     }
 
     update()
     {
-        if (this.game.input.activePointer.isDown) 
+        this.UpdateMouseDrag();
+    }
+
+    UpdateMouseDrag()
+    {
+        if (this.game.input.activePointer.isDown && this.DoesCameraScroll) 
         {	
             if (this.game.DragStartPosition) 
             {		
@@ -77,9 +91,23 @@ Minesweeper.GameState = class GameState extends Phaser.State
             // set new drag origin to current position	
             this.game.DragStartPosition = this.game.input.activePointer.position.clone();
         }
-        else 
-        { 
-            this.game.DragStartPosition = null;
+        else this.game.DragStartPosition = null;
+    }
+
+    UpdateMouseWheel(event) 
+    {   
+        // Set scale
+        let t_WorldScale = (this.camera.scale.x + this.world.scale.y) * 0.5;
+        this.world.scale.set(Math.max(this.game.Settings.Zoom.Min, Math.min(this.game.Settings.Zoom.Max, t_WorldScale + this.input.mouse.wheelDelta * 0.1)));
+
+        // move camera to middle if scrollable
+        t_WorldScale = (this.camera.scale.x + this.world.scale.y) * 0.5;
+        if (this.DoesCameraScroll == false)
+        {
+            this.game.camera.x = this.Bounds.x * t_WorldScale * 0.5 - this.game._width * 0.5;
+            this.game.camera.y = this.Bounds.y * t_WorldScale * 0.5 - this.game._height * 0.5;
         }
+        
+        this.DoesCameraScroll = (this.ViewBounds.x < this.GameBounds.x * this.world.scale.x || this.ViewBounds.y < this.GameBounds.y * this.world.scale.y);
     }
 }
