@@ -8,12 +8,14 @@ Minesweeper.GameState = class GameState extends Phaser.State
 
         this.Title = { Size: 65, Font: "Arial" }; 
         this.BrickDimensions = { x: 22, y: 22 };
+        this.IsGameOver = false;
     }
 
     preload()
     {
         this.game.load.spritesheet("brick", "assets/bricks.png", 21, 21, 3);
         this.game.load.spritesheet("numbers", "assets/numbers.png", 9, 12, 10);
+        this.game.load.image("bomb", "assets/bomb.png");
     }
 
     create()
@@ -60,7 +62,7 @@ Minesweeper.GameState = class GameState extends Phaser.State
                 t_Sprite.smoothed = false;
                 t_Sprite.inputEnabled = true;
 
-                this.GameGrid[t_Index] = new Minesweeper.GridCell(t_Sprite, x, y, this.GameGrid, this.game);
+                this.GameGrid[t_Index] = new Minesweeper.GridCell(t_Sprite, x, y, this.GameGrid, this.game, this);
             }
         }
         
@@ -88,6 +90,29 @@ Minesweeper.GameState = class GameState extends Phaser.State
         
         // Input
         this.game.input.mouse.mouseWheelCallback = this.UpdateMouseWheel.bind(this);
+    }
+
+    OnLose()
+    {
+        this.IsGameOver = true;
+        
+        // Show all mines
+        let t_Size = Minesweeper.Settings.Tiles.Current;
+        for(let y = 0; y < t_Size; y++)
+        {
+            for(let x = 0; x < t_Size; x++)
+            {
+                var t_Cell = this.GetGridElement(x, y);
+
+                if (t_Cell.IsMine == false)
+                    continue;
+
+                let t_Bomb = this.game.add.sprite(t_Cell.Sprite.position.x + t_Cell.Sprite.width * 0.5, t_Cell.Sprite.position.y + t_Cell.Sprite.height * 0.5, "bomb");
+                t_Bomb.position.x -= t_Bomb.width * 0.5;
+                t_Bomb.position.y -= t_Bomb.height * 0.5;
+                t_Bomb.z = this.Sprite + 1;
+            }
+        }
     }
 
     update()

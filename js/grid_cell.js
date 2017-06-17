@@ -2,7 +2,7 @@ var Minesweeper = Minesweeper || {};
 
 Minesweeper.GridCell = class GridCell
 {
-    constructor(a_Sprite, a_X, a_Y, a_Grid, a_Game) 
+    constructor(a_Sprite, a_X, a_Y, a_Grid, a_Game, a_State) 
     {
         this.Sprite = a_Sprite;
         this.IsMine = false;
@@ -10,6 +10,7 @@ Minesweeper.GridCell = class GridCell
         this.IsFlagged = false;
         this.Grid = a_Grid;
         this.Game = a_Game;
+        this.State = a_State;
         this.NumberSprite = null;
 
         this.x = a_X;
@@ -20,6 +21,10 @@ Minesweeper.GridCell = class GridCell
 
     OnGridInput()
     {
+        // Don't allow toggling of cells when game is over
+        if (this.State.IsGameOver)
+            return;
+
         if(this.Game.device.desktop)
         {
             let t_LeftMouse = this.Game.input.activePointer.leftButton.isDown;
@@ -27,8 +32,8 @@ Minesweeper.GridCell = class GridCell
 
             if (t_LeftMouse && t_RightMouse)
                 return; // To be sure the user doesn't mess up accidentally
-            else if (t_LeftMouse) 
-                this.SetClear();
+            else if (t_LeftMouse && this.SetClear() == false) // SetClear returns false when you lose
+                this.State.OnLose();
             else if (t_RightMouse) 
                 this.ToggleFlag();
         }
@@ -67,13 +72,8 @@ Minesweeper.GridCell = class GridCell
 
         this.IsCleared = true;
 
-        // Add a number
-        this.NumberSprite = this.Game.add.sprite(this.Sprite.position.x + this.Sprite.width * 0.5, this.Sprite.position.y + this.Sprite.height * 0.5, "numbers");
-        this.NumberSprite.position.x -= this.NumberSprite.width * 0.5;
-        this.NumberSprite.position.y -= this.NumberSprite.height * 0.5;
-        this.NumberSprite.z = this.Sprite + 1;
-
         // Count mines in surrounding area
+        let t_MinesSurrounding = 0;
         for(let y = -1; y <= 1; y++)
             for(let x = -1; x <= 1; x++)
             {
@@ -85,13 +85,22 @@ Minesweeper.GridCell = class GridCell
                     continue;
                 
                 if (this.Grid[(this.y + y) * Minesweeper.Settings.Tiles.Current + (this.x + x)].IsMine)
-                    this.NumberSprite.frame++;
+                    t_MinesSurrounding++;
             }
-        
-        this.IsCleared = true;
+
+        // Add a number if it's not 0
+        if (t_MinesSurrounding != 0)
+        {
+            this.NumberSprite = this.Game.add.sprite(this.Sprite.position.x + this.Sprite.width * 0.5, this.Sprite.position.y + this.Sprite.height * 0.5, "numbers");
+            this.NumberSprite.position.x -= this.NumberSprite.width * 0.5;
+            this.NumberSprite.position.y -= this.NumberSprite.height * 0.5;
+            this.NumberSprite.z = this.Sprite + 1;
+            this.NumberSprite.frame = t_MinesSurrounding;
+        }
+        else this.Sprite.tint = 0xCCCCCC;
         
         // Open up surrounding areas if it's zero.
-        if (this.NumberSprite.frame == 0)
+        if (t_MinesSurrounding == 0)
         {
             for(let y = -1; y <= 1; y++)
                 for(let x = -1; x <= 1; x++)
