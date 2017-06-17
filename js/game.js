@@ -9,14 +9,9 @@ Minesweeper.Game = class Game extends Phaser.Game
         // states
         this.state.add('menu_state', Minesweeper.MenuState);
         this.state.add('game_state', Minesweeper.GameState);
-        this.state.start('menu_state');
+        this.state.start('game_state');
         
-        console.log("Game started.");
-
-        this.Settings =
-        {
-            Mines: { Min: 0.1, Max: 0.33 },
-            Tiles: { Min: 5, Max: 300 }
-        };
+        this.Settings = Minesweeper.Settings;
+        console.log("Game started.");        
     }
 }
