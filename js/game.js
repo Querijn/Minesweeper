@@ -11,6 +11,6 @@ Minesweeper.Game = class Game extends Phaser.Game
         this.state.add("game_state", Minesweeper.GameState);
         this.state.start(Minesweeper.Settings.StartingState);
 
-        console.log("Game started.");        
+        console.log("Game started.");
     }
 }

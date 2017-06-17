@@ -12,9 +12,7 @@ Minesweeper.GameState = class GameState extends Phaser.State
 
     preload()
     {
-        this.game.load.image("top_brick", "assets/top_brick.png");
-        this.game.load.image("bottom_brick", "assets/bottom_brick.png");
-        this.game.load.image("brick_mask", "assets/bottom_brick.png");
+        this.game.load.spritesheet("brick", "assets/bricks.png", 21, 21, 3);
         this.game.load.spritesheet("numbers", "assets/numbers.png", 9, 12, 10);
     }
 
@@ -41,34 +39,28 @@ Minesweeper.GameState = class GameState extends Phaser.State
         };
 
         // Determine what bounds we should use for the view.
-        this.Bounds = this.GameBounds;
-        if(this.ViewBounds.x > this.GameBounds.x || this.ViewBounds.y > this.GameBounds.y)
-        {
-            console.log("Using view bounds");
-            this.Bounds = this.ViewBounds;
-        }    
+        this.SetBounds();
 
         // If the game bounds exceed in any way, make the camera scrollable
         this.DoesCameraScroll = (this.ViewBounds.x < this.GameBounds.x || this.ViewBounds.y < this.GameBounds.y);
-        this.game.world.setBounds(0, 0, this.Bounds.x, this.Bounds.y);
 
         // Make mine grid
         for(let y = 0; y < t_Size; y++)
         {
             for(let x = 0; x < t_Size; x++)
             {
-                let t_Element = 
-                {
-                    Sprite: this.game.add.sprite(this.Bounds.x * 0.5 + (x - t_Size * 0.5) * this.BrickDimensions.x, this.Bounds.y * 0.5 + (y - t_Size * 0.5) * this.BrickDimensions.y, y == 0 ? "top_brick" : "bottom_brick"),
-                    IsMine: false,
-                    IsFlagged: false
+                let t_Index = y * t_Size + x;
+                let t_Position = 
+                { 
+                    x: this.Bounds.x * 0.5 + (x - t_Size * 0.5) * this.BrickDimensions.x, 
+                    y: this.Bounds.y * 0.5 + (y - t_Size * 0.5) * this.BrickDimensions.y 
                 };
+                var t_Sprite = this.game.add.sprite(t_Position.x, t_Position.y, "brick");
+                t_Sprite.frame = y == 0 ? 1 : 0; // Show top_brick for 0
+                t_Sprite.smoothed = false;
+                t_Sprite.inputEnabled = true;
 
-                t_Element.Sprite.smoothed = false;
-                t_Element.Sprite.inputEnabled = true;
-                t_Element.Sprite.events.onInputDown.add(this.OnInputDown, { State: this, x: x, y: y });
-
-                this.GameGrid[y * t_Size + x] = t_Element;
+                this.GameGrid[t_Index] = new Minesweeper.GridCell(t_Sprite, x, y, this.GameGrid, this.game);
             }
         }
         
@@ -85,7 +77,6 @@ Minesweeper.GameState = class GameState extends Phaser.State
                 var t_PositionY = Math.floor(t_MineIndex / t_Size);
                 var t_PositionX = t_MineIndex % t_Size;
 
-                console.log("Mine at: " + t_PositionX + " " + t_PositionY);
                 this.GameGrid[t_MineIndex].IsMine = true;
                 break;
             }
@@ -126,6 +117,7 @@ Minesweeper.GameState = class GameState extends Phaser.State
         // Set scale
         let t_WorldScale = (this.camera.scale.x + this.world.scale.y) * 0.5;
         this.world.scale.set(Math.max(Minesweeper.Settings.Zoom.Min, Math.min(Minesweeper.Settings.Zoom.Max, t_WorldScale + this.input.mouse.wheelDelta * 0.1)));
+        this.SetBounds();
 
         // move camera to middle if scrollable
         t_WorldScale = (this.camera.scale.x + this.world.scale.y) * 0.5;
@@ -138,8 +130,23 @@ Minesweeper.GameState = class GameState extends Phaser.State
         this.DoesCameraScroll = (this.ViewBounds.x < this.GameBounds.x * this.world.scale.x || this.ViewBounds.y < this.GameBounds.y * this.world.scale.y);
     }
 
-    OnInputDown(x, y)
+    GetGridElement(a_X, a_Y)
     {
-        console.log("hey", this.x, this.y);
+        // Out of bounds
+        if (a_X < 0 || a_X > Minesweeper.Settings.Tiles.Current || a_Y < 0 || a_Y > Minesweeper.Settings.Tiles.Current)
+            return null;
+
+        return this.GameGrid[a_Y * Minesweeper.Settings.Tiles.Current + a_X];
+    }
+
+    SetBounds()
+    {
+        this.Bounds = this.GameBounds;
+        if(this.ViewBounds.x > this.GameBounds.x || this.ViewBounds.y > this.GameBounds.y)
+        {
+            console.log("Using view bounds");
+            this.Bounds = this.ViewBounds;
+        }    
+        this.game.world.setBounds(0, 0, this.Bounds.x, this.Bounds.y);
     }
 }
