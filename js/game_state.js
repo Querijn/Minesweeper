@@ -14,6 +14,8 @@ Minesweeper.GameState = class GameState extends Phaser.State
         this.GameOverText = null;
         this.MenuButton = null;
         this.PlayAgain = null;
+        this.SelectedCell = null;
+        this.OptionMenu = null;
     }
 
     Preload()
@@ -108,7 +110,7 @@ Minesweeper.GameState = class GameState extends Phaser.State
         // Input
         this.game.input.mouse.mouseWheelCallback = this.UpdateMouseWheel.bind(this);
     }
-
+    
     Reset()
     {
         this.IsGameOver = false;
@@ -224,6 +226,7 @@ Minesweeper.GameState = class GameState extends Phaser.State
             this.MenuButton.sprite.scale.set(1.0 / this.world.scale.x);
             this.MenuButton.TextElement.text.scale.set(1.0 / this.world.scale.x);
         } 
+
         if(this.PlayAgain)
         {
             this.PlayAgain.sprite.scale.set(1.0 / this.world.scale.x);
@@ -233,30 +236,59 @@ Minesweeper.GameState = class GameState extends Phaser.State
 
     Update()
     {
-        this.UpdateMouseDrag();
+        if (this.game.device.desktop)
+            this.UpdateDrag(this.game.input.activePointer);
+
+        if (this.game.device.touch) // Desktop can have touch too
+        {
+            this.UpdateTouchInput();
+            this.UpdateDrag(this.game.input.pointer1);
+        }
     }
 
-    UpdateMouseDrag()
+    UpdateTouchInput()
     {
-        if (this.game.input.activePointer.isDown && this.DoesCameraScroll) 
+        if(game.input.pointer1.isDown && game.input.pointer2.isDown)
+        {
+            let t_Distance = Phaser.Point.distance(this.game.input.pointer1.position, this.game.input.pointer2.position);
+            if (this.game.ZoomGestureDistance) 
+                this.Zoom((t_Distance - this.game.ZoomGestureDistance) * 0.2);
+
+            this.game.ZoomGestureDistance = t_Distance;
+        }
+        else this.game.ZoomGestureDistance = null;
+
+        // If radial menu is active and we clicked outside of the grid, hide it.
+        if(this.OptionMenu && game.input.pointer1.isDown && this.IsPointerOverGrid == false)
+            this.HideOptionMenu();
+    }
+
+    UpdateDrag(a_Pointer)
+    {
+        if (a_Pointer.isDown && this.DoesCameraScroll) 
         {	
             if (this.game.DragStartPosition) 
             {		
                 // move the camera by the amount the mouse has moved since last update		
-                this.game.camera.x += this.game.DragStartPosition.x - this.game.input.activePointer.position.x;
-                this.game.camera.y += this.game.DragStartPosition.y - this.game.input.activePointer.position.y;	
+                this.game.camera.x += this.game.DragStartPosition.x - a_Pointer.position.x;
+                this.game.camera.y += this.game.DragStartPosition.y - a_Pointer.position.y;	
             }	
 
             // set new drag origin to current position	
-            this.game.DragStartPosition = this.game.input.activePointer.position.clone();
+            this.game.DragStartPosition = a_Pointer.position.clone();
         }
         else this.game.DragStartPosition = null;
     }
 
     UpdateMouseWheel(event) 
     {   
+        this.Zoom(this.input.mouse.wheelDelta);
+    }
+
+    Zoom(a_Level)
+    {
         // Set scale
-        this.world.scale.set(Math.max(Minesweeper.Settings.Zoom.Min, Math.min(Minesweeper.Settings.Zoom.Max, this.world.scale.x + this.input.mouse.wheelDelta * 0.1)));
+        this.world.scale.set(Math.max(Minesweeper.Settings.Zoom.Min, Math.min(Minesweeper.Settings.Zoom.Max, this.world.scale.x + a_Level * 0.1)));
         this.SetBounds();
 
         // move camera to middle if scrollable
@@ -285,6 +317,66 @@ Minesweeper.GameState = class GameState extends Phaser.State
         }
     }
 
+    HideOptionMenu()
+    {
+        // Reset other tints
+        if (this.SelectedCell)
+            this.SelectedCell.Sprite.tint = this.SelectedCell.Sprite.OldTint;
+        
+        if (this.OptionMenu != null)
+        {
+            this.OptionMenu.ClearButton.sprite.destroy();
+            this.OptionMenu.ClearButton.TextElement.text.destroy();
+            this.OptionMenu.FlagButton.sprite.destroy();
+            this.OptionMenu.FlagButton.TextElement.text.destroy();
+        }
+        
+        this.OptionMenu = null;
+    }
+
+    ShowOptionMenu(a_GridCell)
+    {
+        this.HideOptionMenu();
+        
+        this.SelectedCell = a_GridCell;
+        a_GridCell.Sprite.OldTint = a_GridCell.Sprite.tint;
+        a_GridCell.Sprite.tint = 0xCCFFCC;
+
+        let t_ButtonWidth = 70;
+        this.OptionMenu = 
+        {
+            ClearButton: this.UI.add(new SlickUI.Element.Button(a_GridCell.Sprite.position.x - t_ButtonWidth,           a_GridCell.Sprite.position.y - 6, t_ButtonWidth, 32)),
+            FlagButton: this.UI.add(new SlickUI.Element.Button(a_GridCell.Sprite.position.x + this.BrickDimensions.x,   a_GridCell.Sprite.position.y - 6, t_ButtonWidth, 32))
+        };
+
+        this.OptionMenu.ClearButton.add(this.OptionMenu.ClearButton.TextElement = new SlickUI.Element.Text(0,0, "Clear")).center();
+        this.OptionMenu.ClearButton.sprite.fixedToCamera = false;
+        this.OptionMenu.ClearButton.TextElement.text.fixedToCamera = false;
+        this.OptionMenu.ClearButton.events.onInputUp.add(function () 
+        { 
+            if (this.SelectedCell) 
+            { 
+                this.SelectedCell.SetClear(); 
+                a_GridCell.Sprite.OldTint = a_GridCell.Sprite.tint; // We possibly changed the tint in clear.
+                this.HideOptionMenu(); 
+            } 
+        }.bind(this));
+
+        this.OptionMenu.FlagButton.add(this.OptionMenu.FlagButton.TextElement = new SlickUI.Element.Text(0,0, "Flag")).center();
+        this.OptionMenu.FlagButton.sprite.fixedToCamera = false;
+        this.OptionMenu.FlagButton.TextElement.text.fixedToCamera = false;
+        this.OptionMenu.FlagButton.events.onInputUp.add(function () 
+        { 
+            if (this.SelectedCell) 
+            { 
+                this.SelectedCell.ToggleFlag(); 
+                this.HideOptionMenu(); 
+            } 
+        }.bind(this));
+
+        this.UpdateUI();
+    }
+
     GetGridElement(a_X, a_Y)
     {
         // Out of bounds
@@ -300,6 +392,15 @@ Minesweeper.GameState = class GameState extends Phaser.State
             this.Bounds = this.ViewBounds;
         else this.Bounds = this.GameBounds;
         this.game.world.setBounds(0, 0, this.Bounds.x, this.Bounds.y);
+    }
+
+    get IsPointerOverGrid()
+    {
+        for(let i = 0; i < this.GameGrid.length; i++)
+            if (this.GameGrid[i].IsPointerOver)
+                return true;
+
+        return false;
     }
 
     // To adhere to personal coding style but overload regularly.

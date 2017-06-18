@@ -25,7 +25,12 @@ Minesweeper.GridCell = class GridCell
         if (this.State.IsGameOver)
             return;
 
-        if(this.Game.device.desktop)
+        if (this.Game.device.touch)
+        {
+            // Spawn radial menu
+            this.State.ShowOptionMenu(this);
+        }
+        else if(this.Game.device.desktop)
         {
             let t_LeftMouse = this.Game.input.activePointer.leftButton.isDown;
             let t_RightMouse = this.Game.input.activePointer.rightButton.isDown;
@@ -36,10 +41,6 @@ Minesweeper.GridCell = class GridCell
                 this.State.OnLose();
             else if (t_RightMouse) 
                 this.ToggleFlag();
-        }
-        else if (this.Game.device.touch)
-        {
-            // Spawn radial menu
         }
     }
 
@@ -131,5 +132,10 @@ Minesweeper.GridCell = class GridCell
         // We didn't lose
         this.State.CheckForWin();
         return true;
+    }
+
+    get IsPointerOver()
+    {
+        return this.Sprite.input.pointerOver();
     }
 }
