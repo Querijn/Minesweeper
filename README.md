@@ -1,30 +1,26 @@
 # Minesweeper
 
-A game of minesweeper made with Phaser and SlickUI. Made for a job interview.
+A game of minesweeper made with Phaser and SlickUI. Made for a job interview within a weekend, meeting all requirements and bonuses. All the requirements and bonuses are copied directly from the assignment PDF.
+
+This is my first time working with Phaser. It surely has some options for improvements (use of groups, scaling by those instead), but due to the limited time and the fact I did not know about them beforehand I could not insert them.
+
+Post-mortem: I kind of like Phaser, but rather dislike SlickUI.
 
 ## Requirements
 
-[x] Playable on both Desktop & Mobile browsers
-
-[x] 9x9 grid
-
-[x] 10 mines
-
-[x] Left click to clear a tile
-
-[x] Right click to flag a tile as a bomb
-
-[x] When there are no tiles left that are not bombs, tell the player they won
-
-[x] When the player clears a tile that is a bomb, tell the player they lost
+- Playable on both Desktop & Mobile browsers
+- 9x9 grid
+- 10 mines
+- Left click to clear a tile
+- Right click to flag a tile as a bomb
+- When there are no tiles left that are not bombs, tell the player they won
+- When the player clears a tile that is a bomb, tell the player they lost
 
 ## Bonuses
 
-[x] Different grid sizes (either user selectable, or some premade choices)
-
-[x] Different mine counts, with a max of number of tiles/3. Play the game to determine what feels best here.
-
-[ ] Stretch Goal: Build a simple “bot” that auto plays the game
+- Different grid sizes (either user selectable, or some premade choices)
+- Different mine counts, with a max of number of tiles/3. Play the game to determine what feels best here.
+- Stretch Goal: Build a simple “bot” that auto plays the game
 
 ## I am judged on
 
