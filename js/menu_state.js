@@ -98,7 +98,10 @@ Minesweeper.MenuState = class MenuState extends Phaser.State
 
     GoIngame()
     {
+        this.world.scale.set(1);
         this.game.state.start("game_state");
+
+        Minesweeper.Settings.Tiles.Current = Math.round(Minesweeper.Settings.Tiles.Current); // Make sure this is an integer.
     }
 
     // To adhere to personal coding style but overload regularly.
