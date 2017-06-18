@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <title>Minesweeper</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <script src="js/external/phaser.min.js"></script>
 
         <script src="js/external/slick-ui.min.js"></script>
@@ -31,12 +32,16 @@
         <script src="js/game_state.js"></script>
         <script src="js/game.js"></script>
     </head>
-    <body oncontextmenu="return false;">
+    <body oncontextmenu="return false;" style="overflow: hidden;">
+        <div id="game_div" style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px;">
+
+        </div>
         <script type="text/javascript"> 
             var game = null; // Requires to be 'game' due to slickui limitations
             window.onload = function()  
-            { 
-                game = new Minesweeper.Game(800, 600); 
+            {
+                let t_Dimensions = document.getElementById("game_div").getBoundingClientRect();
+                game = new Minesweeper.Game(t_Dimensions.width, t_Dimensions.height, "game_div"); 
             };
         </script>
     </body>

@@ -2,10 +2,10 @@ var Minesweeper = Minesweeper || {};
 
 Minesweeper.Game = class Game extends Phaser.Game
 {
-    constructor(a_Width, a_Height) 
+    constructor(a_Width, a_Height, a_DivID) 
     {
         // Using CANVAS because of a flicker in WebGL
-        super(a_Width, a_Height, Phaser.CANVAS, "minesweeper");
+        super(a_Width, a_Height, Phaser.CANVAS, a_DivID);
 
         // states
         this.state.add("menu_state", Minesweeper.MenuState);
