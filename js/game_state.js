@@ -243,16 +243,16 @@ Minesweeper.GameState = class GameState extends Phaser.State
 
     UpdateMouseWheel(event) 
     {   
-        // // Set scale
-        // this.world.scale.set(Math.max(Minesweeper.Settings.Zoom.Min, Math.min(Minesweeper.Settings.Zoom.Max, this.world.scale.x + this.input.mouse.wheelDelta * 0.1)));
-        // this.SetBounds();
+        // Set scale
+        this.world.scale.set(Math.max(Minesweeper.Settings.Zoom.Min, Math.min(Minesweeper.Settings.Zoom.Max, this.world.scale.x + this.input.mouse.wheelDelta * 0.1)));
+        this.SetBounds();
 
-        // // move camera to middle if scrollable
-        // this.game.camera.x = this.Bounds.x * this.world.scale.x * 0.5 - this.game._width * 0.5;
-        // this.game.camera.y = this.Bounds.y * this.world.scale.x * 0.5 - this.game._height * 0.5;
+        // move camera to middle if scrollable
+        this.game.camera.x = this.Bounds.x * this.world.scale.x * 0.5 - this.game._width * 0.5;
+        this.game.camera.y = this.Bounds.y * this.world.scale.x * 0.5 - this.game._height * 0.5;
         
-        // this.DoesCameraScroll = (this.ViewBounds.x < this.GameBounds.x * this.world.scale.x || this.ViewBounds.y < this.GameBounds.y * this.world.scale.y);
-        // this.UpdateUI();
+        this.DoesCameraScroll = (this.ViewBounds.x < this.GameBounds.x * this.world.scale.x || this.ViewBounds.y < this.GameBounds.y * this.world.scale.y);
+        this.UpdateUI();
     }
 
     ShowMines()
