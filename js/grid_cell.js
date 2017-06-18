@@ -53,11 +53,22 @@ Minesweeper.GridCell = class GridCell
         let t_Y = this.Sprite.position.y;
 
         if (this.IsFlagged)
+        {
             this.Sprite.frame = this.y == 0 ? 1 : 0; // Show top_brick for 0
-        else this.Sprite.frame = 2; // Show flagged
-        this.IsFlagged = !this.IsFlagged;
-        
-        this.Sprite.events.onInputDown.add(this.OnGridInput, this);
+            this.State.FlagsAvailable++;
+            this.IsFlagged = false;
+            
+            this.State.UpdateUI(); // Show that we added a flag.
+        }    
+        else if (this.State.FlagsAvailable) // If we have a flag..
+        {
+            this.Sprite.frame = 2; // Show flagged
+            this.State.FlagsAvailable--;
+            this.IsFlagged = true;
+
+            this.State.UpdateUI(); // Show that we used a flag.
+            this.State.CheckForWin();
+        }
     }
 
     SetClear()
@@ -96,6 +107,7 @@ Minesweeper.GridCell = class GridCell
             this.NumberSprite.position.y -= this.NumberSprite.height * 0.5;
             this.NumberSprite.z = this.Sprite + 1;
             this.NumberSprite.frame = t_MinesSurrounding;
+            this.NumberSprite.smoothed = false;
         }
         else this.Sprite.tint = 0xCCCCCC;
         
@@ -117,6 +129,7 @@ Minesweeper.GridCell = class GridCell
         }  
 
         // We didn't lose
+        this.State.CheckForWin();
         return true;
     }
 }

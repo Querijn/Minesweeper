@@ -9,17 +9,19 @@ Minesweeper.MenuState = class MenuState extends Phaser.State
         this.Title = { Size: 65, Font: "Arial" }; 
     }
 
-    preload()
+    Preload()
     {
         console.log("Preload menu");
-
+        
         // plugins
         this.UI = this.game.plugins.add(Phaser.Plugin.SlickUI);
         this.UI.load("assets/kenney.json");
     }
 
-    create()
+    Create()
     {
+        this.stage.backgroundColor = Minesweeper.Settings.BackgroundColor;
+
         this.Title.Object = this.add.text(200, 0, "Minesweeper", { font: this.Title.Size + "px " + this.Title.Font, fill: "#FFF", align: "center" });
         
         // Create a UI element with 8 pixels from each side. Space top from title by title font size.
@@ -81,4 +83,8 @@ Minesweeper.MenuState = class MenuState extends Phaser.State
     {
         this.game.state.start("game_state");
     }
+
+    // To adhere to personal coding style but overload regularly.
+    preload() { this.Preload(); }
+    create() { this.Create(); }
 }
