@@ -4,6 +4,7 @@ A game of minesweeper made with Phaser and SlickUI. Made for a job interview.
 
 ## Requirements
 
+[ ] Playable on both Desktop & Mobile browsers
 [x] 9x9 grid
 [x] 10 mines
 [x] Left click to clear a tile
