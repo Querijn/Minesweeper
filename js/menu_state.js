@@ -74,7 +74,7 @@ Minesweeper.MenuState = class MenuState extends Phaser.State
         this.MineSlider.onDrag.add(TextUpdateFunction.bind(this, this.MinesLabel));
         this.MineSlider.onDragStart.add(TextUpdateFunction.bind(this, this.MinesLabel));
         this.MineSlider.onDragStop.add(TextUpdateFunction.bind(this, this.MinesLabel));
-        TextUpdateFunction.call(this, this.MinesLabel, this.TilesSlider._value);
+        TextUpdateFunction.call(this, this.MinesLabel, this.MineSlider._value);
 
         // Is Bot checkbox
         this.Panel.add(this.IsBotCheckbox = new SlickUI.Element.Checkbox(8, 100));

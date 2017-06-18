@@ -1,6 +1,6 @@
 # Minesweeper
 
-A game of minesweeper made with Phaser and SlickUI. Made for a job interview within a weekend, meeting all requirements and bonuses. All the requirements and bonuses are copied directly from the assignment PDF.
+A game of minesweeper made with Phaser and SlickUI. Made for a job interview within a weekend, meeting all requirements and bonuses noted below. All the requirements and bonuses are copied directly from the assignment PDF.
 
 This is my first time working with Phaser. It surely has some options for improvements (use of groups, scaling by those instead), but due to the limited time and the fact I did not know about them beforehand I could not insert them.
 

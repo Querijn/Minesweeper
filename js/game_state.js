@@ -88,7 +88,7 @@ Minesweeper.GameState = class GameState extends Phaser.State
             while(true)
             {
                 var t_MineIndex = Math.floor(Math.random() * t_Size * t_Size);
-                if (this.GameGrid[t_MineIndex].IsMine) // Already a mine, try again
+                if (t_MineIndex >= t_Size * t_Size || this.GameGrid[t_MineIndex].IsMine) // Already a mine or rare out of bounds, try again
                     continue;
                 
                 var t_PositionY = Math.floor(t_MineIndex / t_Size);
