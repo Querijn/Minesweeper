@@ -21,6 +21,10 @@ Minesweeper.GridCell = class GridCell
 
     OnGridInput()
     {
+        // Don't ruin it for the bot.
+        if (Minesweeper.Settings.IsBot)
+            return;
+
         // Don't allow toggling of cells when game is over
         if (this.State.IsGameOver)
             return;
@@ -37,8 +41,8 @@ Minesweeper.GridCell = class GridCell
 
             if (t_LeftMouse && t_RightMouse)
                 return; // To be sure the user doesn't mess up accidentally
-            else if (t_LeftMouse && this.SetClear() == false) // SetClear returns false when you lose
-                this.State.OnLose();
+            else if (t_LeftMouse)
+                this.SetClear();
             else if (t_RightMouse) 
                 this.ToggleFlag();
         }
@@ -80,25 +84,14 @@ Minesweeper.GridCell = class GridCell
 
         // We lose when it's a mine
         if (this.IsMine)
+        {
+            this.State.OnLose();
             return false;
+        }
 
         this.IsCleared = true;
 
-        // Count mines in surrounding area
-        let t_MinesSurrounding = 0;
-        for(let y = -1; y <= 1; y++)
-            for(let x = -1; x <= 1; x++)
-            {
-                if(y == 0 && x == 0)
-                    continue;
-
-                // Don't count out of bounds
-                if (this.y + y < 0 || this.y + y >= Minesweeper.Settings.Tiles.Current || this.x + x < 0 || this.x + x >= Minesweeper.Settings.Tiles.Current)
-                    continue;
-                
-                if (this.Grid[(this.y + y) * Minesweeper.Settings.Tiles.Current + (this.x + x)].IsMine)
-                    t_MinesSurrounding++;
-            }
+        let t_MinesSurrounding = this.MinesSurrounding;
 
         // Add a number if it's not 0
         if (t_MinesSurrounding != 0)
@@ -137,5 +130,26 @@ Minesweeper.GridCell = class GridCell
     get IsPointerOver()
     {
         return this.Sprite.input.pointerOver();
+    }
+
+    get MinesSurrounding()
+    {
+        // Count mines in surrounding area
+        let t_MinesSurrounding = 0;
+        for(let y = -1; y <= 1; y++)
+            for(let x = -1; x <= 1; x++)
+            {
+                if(y == 0 && x == 0)
+                    continue;
+
+                // Don't count out of bounds
+                if (this.y + y < 0 || this.y + y >= Minesweeper.Settings.Tiles.Current || this.x + x < 0 || this.x + x >= Minesweeper.Settings.Tiles.Current)
+                    continue;
+                
+                if (this.Grid[(this.y + y) * Minesweeper.Settings.Tiles.Current + (this.x + x)].IsMine)
+                    t_MinesSurrounding++;
+            }
+        
+        return t_MinesSurrounding;
     }
 }

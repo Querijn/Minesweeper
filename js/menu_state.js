@@ -25,7 +25,7 @@ Minesweeper.MenuState = class MenuState extends Phaser.State
         
         this.stage.backgroundColor = Minesweeper.Settings.BackgroundColor;
 
-        this.Title.Object = this.add.text(200, 0, "Minesweeper", { font: this.Title.Size + "px " + this.Title.Font, fill: "#FFF", align: "center" });
+        this.Title.Object = this.add.text(8, 0, "Minesweeper", { font: this.Title.Size + "px " + this.Title.Font, fill: "#FFF", align: "center" });
         
         // Create a UI element with 8 pixels from each side. Space top from title by title font size.
         this.UI.add(this.Panel = new SlickUI.Element.Panel(8, this.Title.Size, this.game.width - 16, this.game.height - this.Title.Size - 8));
@@ -51,7 +51,7 @@ Minesweeper.MenuState = class MenuState extends Phaser.State
         // Tile Slider
         let t_SliderValueOffset = (Minesweeper.Settings.Tiles.Current - Minesweeper.Settings.Tiles.Min) / (Minesweeper.Settings.Tiles.Max - Minesweeper.Settings.Tiles.Min);
         this.Panel.add(this.TilesSlider = new SlickUI.Element.Slider(t_SliderOffset, 20, this.Panel.width - t_SliderOffset - 32, t_SliderValueOffset));
-        this.Panel.add(this.TilesLabel = new SlickUI.Element.Text(0, 10, "Tiles: "));
+        this.Panel.add(this.TilesLabel = new SlickUI.Element.Text(8, 10, "Tiles: "));
         
         this.TilesLabel.Label = this.TilesLabel.value;
         this.TilesLabel.Setting = "Tiles";
@@ -65,7 +65,7 @@ Minesweeper.MenuState = class MenuState extends Phaser.State
         // Mine Slider
         t_SliderValueOffset = (Minesweeper.Settings.Mines.Current - Minesweeper.Settings.Mines.Min) / (Minesweeper.Settings.Mines.Max - Minesweeper.Settings.Mines.Min);
         this.Panel.add(this.MineSlider = new SlickUI.Element.Slider(t_SliderOffset, 68, this.Panel.width - t_SliderOffset - 32, t_SliderValueOffset));
-        this.Panel.add(this.MinesLabel = new SlickUI.Element.Text(0, 60, "Mines: "));
+        this.Panel.add(this.MinesLabel = new SlickUI.Element.Text(8, 60, "Mines: "));
 
         this.MinesLabel.Label = this.MinesLabel.value;
         this.MinesLabel.Setting = "Mines";
@@ -76,10 +76,24 @@ Minesweeper.MenuState = class MenuState extends Phaser.State
         this.MineSlider.onDragStop.add(TextUpdateFunction.bind(this, this.MinesLabel));
         TextUpdateFunction.call(this, this.MinesLabel, this.TilesSlider._value);
 
+        // Is Bot checkbox
+        this.Panel.add(this.IsBotCheckbox = new SlickUI.Element.Checkbox(8, 100));
+        this.Panel.add(new SlickUI.Element.Text(58, 104, "Let it be played by a bot?"));
+        this.IsBotCheckbox.checked = Minesweeper.Settings.IsBot;
+        this.IsBotCheckbox.events.onInputDown.add(function ()
+        {
+            Minesweeper.Settings.IsBot = this.IsBotCheckbox.checked;
+        }, this);
+
+        // Instructions
+        let t_Instructions = "Left click to clear a tile, exposing the mine or the surrounding mine count.\nRight click to flag a potential mine.";
+        if(this.game.device.desktop == false) t_Instructions = "Tap on a tile to show options to clear a mine or to flag.\nClearing exposes a mine (losing you the game) or shows surrounding mine count.";
+        this.Panel.add(new SlickUI.Element.Text(8, 150, t_Instructions+ "\nWin by clearing all non-mine fields and flagging all mines!"));
+
         // Start game button
-        this.Panel.add(this.StartGameButton = new SlickUI.Element.Button(0, 100, 140, 80));
+        this.Panel.add(this.StartGameButton = new SlickUI.Element.Button(8, 250, 140, 80));
         this.StartGameButton.events.onInputUp.add(this.GoIngame.bind(this));
-        this.StartGameButton.add(new SlickUI.Element.Text(0,0, "Start Game")).center();
+        this.StartGameButton.add(new SlickUI.Element.Text(8, 0, "Start Game")).center();
     }
 
     GoIngame()

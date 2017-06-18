@@ -16,6 +16,8 @@ Minesweeper.GameState = class GameState extends Phaser.State
         this.PlayAgain = null;
         this.SelectedCell = null;
         this.OptionMenu = null;
+        this.Bot = null;
+        this.BotTimer = 0;
     }
 
     Preload()
@@ -109,6 +111,13 @@ Minesweeper.GameState = class GameState extends Phaser.State
         
         // Input
         this.game.input.mouse.mouseWheelCallback = this.UpdateMouseWheel.bind(this);
+
+        // Bot
+        if (Minesweeper.Settings.IsBot)
+        {
+            this.Bot = new Minesweeper.Bot(this);
+            this.Bot.RunActions();    
+        }   
     }
     
     Reset()
@@ -147,6 +156,7 @@ Minesweeper.GameState = class GameState extends Phaser.State
         this.GameOverText = null;
         this.MenuButton = null;
         this.PlayAgain = null;
+        this.Bot = null;
     }
 
     CheckForWin()
@@ -243,6 +253,21 @@ Minesweeper.GameState = class GameState extends Phaser.State
         {
             this.UpdateTouchInput();
             this.UpdateDrag(this.game.input.pointer1);
+        }
+
+    }
+
+    Render()
+    {
+        if (this.Bot)
+        {
+            this.BotTimer += this.game._deltaTime;
+
+            if (this.BotTimer > 300)
+            {
+                this.BotTimer = 0;
+                this.Bot.RunActions();
+            }
         }
     }
 
@@ -407,4 +432,5 @@ Minesweeper.GameState = class GameState extends Phaser.State
     update() { this.Update(); }
     preload() { this.Preload(); }
     create() { this.Create(); }
+    render() { this.Render(); }
 }
