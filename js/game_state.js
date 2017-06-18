@@ -96,6 +96,7 @@ Minesweeper.GameState = class GameState extends Phaser.State
         }
 
         // Center camera
+        this.game.world.scale.set(1.0);
         this.game.camera.x = this.Bounds.x * 0.5 - this.game._width * 0.5;
         this.game.camera.y = this.Bounds.y * 0.5 - this.game._height * 0.5;
 
@@ -172,51 +173,62 @@ Minesweeper.GameState = class GameState extends Phaser.State
 
     OnLose()
     {
+        if (this.IsGameOver)
+            return;
+
         this.IsGameOver = true;
         this.Won = false;
 
-        this.ShowMines();
-        this.UI.add(this.GameOverText = new SlickUI.Element.Text(8, 16, "You lost!"));
-
-        // Play again button
-        this.UI.add(this.PlayAgain = new SlickUI.Element.Button(8, 38, 140, 32));
-        this.PlayAgain.events.onInputUp.add(this.create.bind(this));
-        this.PlayAgain.add(new SlickUI.Element.Text(0,0, "Try again")).center();
-
-        // Play again button
-        this.UI.add(this.PlayAgain = new SlickUI.Element.Button(8, 38, 140, 32));
-        this.PlayAgain.events.onInputUp.add(this.create.bind(this));
-        this.PlayAgain.add(new SlickUI.Element.Text(0,0, "Try again")).center();
-
-        // Menu button
-        this.UI.add(this.MenuButton = new SlickUI.Element.Button(8, 78, 140, 32));
-        this.MenuButton.events.onInputUp.add(function() { this.game.state.start("menu_state") }.bind(this));
-        this.MenuButton.add(new SlickUI.Element.Text(0, 0, "Go to menu")).center();
+        // Show shared endgame UI
+        this.OnGameEndUI();
     }
 
     OnWin()
     {
+        if (this.IsGameOver)
+            return;
+
         this.IsGameOver = true;
         this.Won = true;
+        
+        // Show shared endgame UI
+        this.OnGameEndUI();
+    }
 
+    OnGameEndUI()
+    {
         this.ShowMines();
-        this.UI.add(this.GameOverText = new SlickUI.Element.Text(8, 16, "You won!"));
+        this.UI.add(this.GameOverText = new SlickUI.Element.Text(8, 16, this.Won ? "You won!" : "You lost!"));
 
         // Play again button
         this.UI.add(this.PlayAgain = new SlickUI.Element.Button(8, 38, 140, 32));
         this.PlayAgain.events.onInputUp.add(this.create.bind(this));
-        this.PlayAgain.add(new SlickUI.Element.Text(0, 0, "Play again")).center();
+        this.PlayAgain.add(this.PlayAgain.TextElement = new SlickUI.Element.Text(0,0, this.Won ? "Play again" : "Try again")).center();
 
         // Menu button
         this.UI.add(this.MenuButton = new SlickUI.Element.Button(8, 78, 140, 32));
         this.MenuButton.events.onInputUp.add(function() { this.game.state.start("menu_state") }.bind(this));
-        this.MenuButton.add(new SlickUI.Element.Text(0, 0, "Go to menu")).center();
+        this.MenuButton.add(this.MenuButton.TextElement = new SlickUI.Element.Text(0, 0, "Go to menu")).center();
+        this.UpdateUI();
     }
+
 
     UpdateUI()
     {
         this.FlagsText.value = this.FlagsText.Label + this.FlagsAvailable;
         this.FlagsText.text.scale.set(1.0 / this.world.scale.x);
+
+        if(this.GameOverText) this.GameOverText.text.scale.set(1.0 / this.world.scale.x);
+        if(this.MenuButton)
+        {
+            this.MenuButton.sprite.scale.set(1.0 / this.world.scale.x);
+            this.MenuButton.TextElement.text.scale.set(1.0 / this.world.scale.x);
+        } 
+        if(this.PlayAgain)
+        {
+            this.PlayAgain.sprite.scale.set(1.0 / this.world.scale.x);
+            this.PlayAgain.TextElement.text.scale.set(1.0 / this.world.scale.x);
+        } 
     }
 
     Update()
