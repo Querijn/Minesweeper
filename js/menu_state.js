@@ -20,6 +20,9 @@ Minesweeper.MenuState = class MenuState extends Phaser.State
 
     Create()
     {
+        // reset zoom
+        this.world.scale.set(1);
+        
         this.stage.backgroundColor = Minesweeper.Settings.BackgroundColor;
 
         this.Title.Object = this.add.text(200, 0, "Minesweeper", { font: this.Title.Size + "px " + this.Title.Font, fill: "#FFF", align: "center" });
